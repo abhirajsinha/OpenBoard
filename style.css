@@ -33,6 +33,20 @@ body{
     left: 20vw;
 }
 
+.scale-tools{
+    animation-name: scale-tools;
+    animation-duration: 1s;
+}
+
+@keyframes scale-tools {
+    0%{
+        transform: scale(0.1);
+    }
+    100%{
+        transform: scale(1);
+    }
+}
+
 .tools-cont > *{
     display: block;
     width: 4rem;
