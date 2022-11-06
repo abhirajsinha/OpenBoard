@@ -29,11 +29,61 @@ body{
     justify-content: space-around;
     position: absolute;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    top: 2rem;
+    top: 1rem;
     left: 20vw;
 }
 
 .tools-cont > *{
     display: block;
     width: 4rem;
+}
+
+.pencil-tool-cont{
+    height: 6rem;
+    width: 8rem;
+    /* background-color: #f1f2f6; */
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    position: absolute;
+    top: 6rem;
+    left: 20vw;
+    border-radius: 3px;
+}
+
+.pencil-width-cont{
+    /* background-color: orange; */
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pencil-width-cont input{
+    width: 80%;
+}
+
+.pencil-color-cont{
+    /* background-color: yellow; */
+    height: calc( 100% - 1rem );
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pencil-color{
+    width: 1.5rem;
+    height: 1.8rem;
+    border-radius: 50%;
+}
+
+.black{
+    background-color: black;
+}
+
+.blue{
+    background-color: blue;
+}
+
+.red{
+    background-color: red;
 }
