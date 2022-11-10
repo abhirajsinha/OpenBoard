@@ -55,7 +55,12 @@ canvas.addEventListener("mousemove", (e) => {
 
   //Only color in your canvas/ perfrom mousemovement when your mouse is down
   if (mousedown) {
-    drawStroke({ x: e.clientX, y: e.clientY });
+    drawStroke({
+      x: e.clientX,
+      y: e.clientY,
+      color: eraserFlag ? eraserColor : penColor,
+      width: eraserFlag ? eraserWidth : penWidth,
+    });
   }
 });
 
@@ -73,6 +78,8 @@ function beginPath(strokeObj) {
 }
 
 function drawStroke(strokeObj) {
+    tool.strokeStyle = strokeObj.color;
+    tool.lineWidth = strokeObj.width;
   tool.lineTo(strokeObj.x, strokeObj.y);
   tool.stroke();
 }
@@ -91,16 +98,16 @@ pencilWidthElem.addEventListener("change", (e) => {
 });
 
 eraserWidthElem.addEventListener("change", (e) => {
-    eraserWidth=eraserWidthElem.value;
-    tool.lineWidth = eraserWidth;
+  eraserWidth = eraserWidthElem.value;
+  tool.lineWidth = eraserWidth;
 });
 
-eraser.addEventListener("click",(e)=>{
-    if(eraserFlag){
-        tool.strokeStyle = eraserColor;
-        tool.lineWidth = eraserWidth;
-    }else{
-        tool.strokeStyle = penColor;
-        tool.lineWidth = penWidth;
-    }
-})
+eraser.addEventListener("click", (e) => {
+  if (eraserFlag) {
+    tool.strokeStyle = eraserColor;
+    tool.lineWidth = eraserWidth;
+  } else {
+    tool.strokeStyle = penColor;
+    tool.lineWidth = penWidth;
+  }
+});
