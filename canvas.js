@@ -25,10 +25,18 @@ canvas.height = window.innerHeight;
 // tool.lineWidth = "8";
 // tool.stroke();
 
-let tool = canvas.getContext("2d"); //Canvas API to draw the graphics in our canvas/page, it includes lot of of functions related to canvas
-tool.strokeStyle = "red"; //line color
-tool.lineWidth = "3"; //Width of thr line
+//---------------------------------------START THE CODE FROM HERE-----------------------------------------------//
 let mousedown = false;
+let pencilColor = document.querySelectorAll(".pencil-color");
+let pencilWidthElem = document.querySelector(".pencil-width");
+let eraserWidthElem = document.querySelector(".eraser-width");
+let penColor = "red";
+let eraserColor = "white";
+let penWidth = pencilWidthElem.ariaValueMax;
+let eraserWidth = eraserWidthElem.value;
+let tool = canvas.getContext("2d"); //Canvas API to draw the graphics in our canvas/page, it includes lot of of functions related to canvas
+tool.strokeStyle = penColor; //line color
+tool.lineWidth = penWidth; //Width of thr line
 
 //Mousedown -> Start a new path from where the user clicks on the canvas
 canvas.addEventListener("mousedown", (e) => {
@@ -64,7 +72,35 @@ function beginPath(strokeObj) {
   tool.moveTo(strokeObj.x, strokeObj.y);
 }
 
-function drawStroke(strokeObj){
-    tool.lineTo(strokeObj.x, strokeObj.y);
-    tool.stroke();
+function drawStroke(strokeObj) {
+  tool.lineTo(strokeObj.x, strokeObj.y);
+  tool.stroke();
 }
+
+pencilColor.forEach((color) => {
+  color.addEventListener("click", (e) => {
+    let colorValue = color.classList[0];
+    penColor = colorValue;
+    tool.strokeStyle = penColor; //line color
+  });
+});
+
+pencilWidthElem.addEventListener("change", (e) => {
+  penWidth = pencilWidthElem.value;
+  tool.lineWidth = penWidth; //Width of thr line
+});
+
+eraserWidthElem.addEventListener("change", (e) => {
+    eraserWidth=eraserWidthElem.value;
+    tool.lineWidth = eraserWidth;
+});
+
+eraser.addEventListener("click",(e)=>{
+    if(eraserFlag){
+        tool.strokeStyle = eraserColor;
+        tool.lineWidth = eraserWidth;
+    }else{
+        tool.strokeStyle = penColor;
+        tool.lineWidth = penWidth;
+    }
+})
