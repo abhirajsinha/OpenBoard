@@ -10,6 +10,7 @@ let upload = document.querySelector(".upload");
 let pencilFlag = false;
 let eraserFlag = false;
 
+optionsCont.click();
 optionsCont.addEventListener("click", (e) => {
     // true -> tools show, false -> hide tools
     optionsFlag = !optionsFlag;
@@ -17,7 +18,6 @@ optionsCont.addEventListener("click", (e) => {
     if (optionsFlag) openTools();
     else closeTools();
 })
-
 
 function openTools() {
     let iconElem = optionsCont.children[0];
