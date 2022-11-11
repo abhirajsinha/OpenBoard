@@ -37,6 +37,12 @@ let eraserWidth = eraserWidthElem.value;
 let tool = canvas.getContext("2d"); //Canvas API to draw the graphics in our canvas/page, it includes lot of of functions related to canvas
 tool.strokeStyle = penColor; //line color
 tool.lineWidth = penWidth; //Width of thr line
+let download = document.querySelector(".download");
+let redo = document.querySelector(".redo");
+let undo = document.querySelector(".undo");
+let undoRedoTracker =[];
+let track=0;//1-> redo, 0->undo
+
 
 //Mousedown -> Start a new path from where the user clicks on the canvas
 canvas.addEventListener("mousedown", (e) => {
@@ -66,6 +72,11 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mouseup", (e) => {
   mousedown = false;
+
+  //UndoRedo
+  let url = canvas.toDataURL();
+  undoRedoTracker.push(url);
+  track = undoRedoTracker.length-1;
 });
 
 function beginPath(strokeObj) {
@@ -111,3 +122,47 @@ eraser.addEventListener("click", (e) => {
     tool.lineWidth = penWidth;
   }
 });
+
+// ---------- DOWNLOAD -----------//
+download.addEventListener("click",(e)=>{
+    let url = canvas.toDataURL();
+    let a = document.createElement("a");
+    a.href=url;
+    a.download="board.jpg";
+    a.click();
+})
+
+// ---------- UNDO REDO -----------//
+undo.addEventListener("click",(e)=>{
+    //For undo do -- in track
+    if(track>=1) track--;
+    
+    let trackObj = {
+        trackValue: track,
+        undoRedoTracker
+    }
+    undoRedoCanvas(trackObj);
+});
+
+redo.addEventListener("click",(e)=>{
+    //For redo do ++ in track
+    if(track<undoRedoTracker.length-1) track++;
+    
+    let trackObj = {
+        trackValue: track,
+        undoRedoTracker
+    }
+    undoRedoCanvas(trackObj);
+});
+
+function undoRedoCanvas(trackObj){
+    track = trackObj.trackValue;
+    undoRedoTracker = trackObj.undoRedoTracker;
+
+    let url = undoRedoTracker[track];
+    let img = new Image();// new image reference element
+    img.src=url;
+    img.onload = (e) =>{
+        tool.drawImage(img,0,0, canvas.width, canvas.height);//draw previous data image on the canvas
+    }
+}
