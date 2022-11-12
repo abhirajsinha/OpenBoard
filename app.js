@@ -15,15 +15,15 @@ let io = socket(server);
 io.on("connection", (socket) => {
     console.log("Made socket connection");
     // Received data
-    socket.on("beginPath", (data) => {
+    socket.on("onmousedown", (data) => {
         // data -> data from frontend
         // Now transfer data to all connected computers
-        io.sockets.emit("beginPath", data);
+        io.sockets.emit("onmousedown", data);
     })
-    socket.on("drawStroke", (data) => {
-        io.sockets.emit("drawStroke", data);
+    socket.on("onmousemove", (data) => {
+        io.sockets.emit("onmousemove", data);
     })
-    socket.on("redoUndo", (data) => {
-        io.sockets.emit("redoUndo", data);
+    socket.on("redraw", (data) => {
+        io.sockets.emit("redraw", data);
     })
 })

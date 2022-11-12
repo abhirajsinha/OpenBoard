@@ -41,6 +41,7 @@ pencil.addEventListener("click", (e) => {
 
     if (pencilFlag) pencilToolCont.style.display = "block";
     else pencilToolCont.style.display = "none";
+    socket.emit( "pencil"  , "black" );
 })
 
 eraser.addEventListener("click", (e) => {
