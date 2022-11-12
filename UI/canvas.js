@@ -161,7 +161,6 @@ download.addEventListener("click", (e) => {
     a.click();
 })
 
-
 socket.on("beginPath", (data) => {
     // data -> data from server
     beginPath(data);
