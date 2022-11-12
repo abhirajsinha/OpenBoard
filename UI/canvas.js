@@ -128,6 +128,7 @@ eraserWidthElem.addEventListener("change", (e) => {
 });
 
 eraser.addEventListener("click", (e) => {
+  eraserFlag!=eraserFlag;
   if (eraserFlag) {
     tool.strokeStyle = eraserColor;
     tool.lineWidth = eraserWidth;
