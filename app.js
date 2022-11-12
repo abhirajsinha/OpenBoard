@@ -3,7 +3,7 @@ const socket = require("socket.io");
 
 const app = express(); //Initialized and server ready
 
-app.use(express.static("UI"));
+app.use(express.static("public"));
 
 let port = process.env.PORT || 3000;
 let server = app.listen(port, () => {
