@@ -78,7 +78,7 @@ canvas.addEventListener("mousedown", (e) => {
   tool.beginPath();
   tool.moveTo(x, y);
   // send data to server
-  socket.emit("md", data);
+  socket.emit("onmousedown", data);
 });
 canvas.addEventListener("mousemove", (e) => {
   if (mouseDown) {
@@ -95,7 +95,7 @@ canvas.addEventListener("mousemove", (e) => {
     undoRedoTracker.push(data);
     tool.lineTo(x, y);
     tool.stroke();
-    socket.emit("mm", data);
+    socket.emit("onmousemove", data);
   }
 });
 canvas.addEventListener("mouseup", (e) => {
