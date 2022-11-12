@@ -28,130 +28,80 @@ canvas.height = window.innerHeight;
 // tool.stroke();
 
 //---------------------------------------START THE CODE FROM HERE-----------------------------------------------//
-let canvas = document.querySelector("canvas");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-// API
-let tool = canvas.getContext("2d");
-
-window.addEventListener("resize", function () {
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
-  redraw();
-});
-
+let mousedown = false;
 let pencilColor = document.querySelectorAll(".pencil-color");
 let pencilWidthElem = document.querySelector(".pencil-width");
 let eraserWidthElem = document.querySelector(".eraser-width");
+let penColor = "red";
+let eraserColor = "white";
+let penWidth = pencilWidthElem.ariaValueMax;
+let eraserWidth = eraserWidthElem.value;
+let tool = canvas.getContext("2d"); //Canvas API to draw the graphics in our canvas/page, it includes lot of of functions related to canvas
+tool.strokeStyle = penColor; //line color
+tool.lineWidth = penWidth; //Width of thr line
 let download = document.querySelector(".download");
 let redo = document.querySelector(".redo");
 let undo = document.querySelector(".undo");
+let undoRedoTracker = [];
+let track = 0; //1-> redo, 0->undo
 
-let penColor = "red";
-let eraserColor = "white";
-let penWidth = pencilWidthElem.value;
-let eraserWidth = eraserWidthElem.value;
-
-let undoRedoTracker = []; //Data
-let removedPoints=[];
-let track = 0; // Represent which action from tracker array
-
-let isPenDown = false;
-
-tool.strokeStyle = penColor;
-tool.lineWidth = penWidth;
-
-// mousedown -> start new path, mousemove -> path fill (graphics)
+//Mousedown -> Start a new path from where the user clicks on the canvas
 canvas.addEventListener("mousedown", (e) => {
-  mouseDown = true;
-  let top = canvas.getBoundingClientRect();
-  let x = e.clientX;
-  let y = e.clientY - top;
+  mousedown = true;
+  /*
+        clientX -> Means the current point where a user pointed his cursor in X axis
+        clientY -> Means the current point where a user pointed his cursor in Y axis
+    */
+  // beginPath({ x: e.clientX, y: e.clientY });
   let data = {
-    x: x,
-    y: y,
-    id: "md", //mouseDown,
-    color: tool.strokeStyle(),
-    width: tool.lineWidth(),
+    x: e.clientX,
+    y: e.clientY,
   };
-  undoRedoTracker.push(data);
-  tool.beginPath();
-  tool.moveTo(x, y);
-  // send data to server
-  socket.emit("onmousedown", data);
+  socket.emit("beginPath", data);
 });
+
 canvas.addEventListener("mousemove", (e) => {
-  if (mouseDown) {
-    let top = canvas.getBoundingClientRect();
-    let x = e.clientX;
-    let y = e.clientY - top;
+  /*
+        mousemove -> Fill the graphics/page with line color till where the user is moving its cursor
+    */
+
+  //Only color in your canvas/ perfrom mousemovement when your mouse is down
+  if (mousedown) {
     let data = {
-      x: x,
-      y: y,
-      id: mm, //mouseMove
-      color: tool.strokeStyle,
-      width: tool.lineWidth,
+      x: e.clientX,
+      y: e.clientY,
+      color: eraserFlag ? eraserColor : penColor,
+      width: eraserFlag ? eraserWidth : penWidth,
     };
-    undoRedoTracker.push(data);
-    tool.lineTo(x, y);
-    tool.stroke();
-    socket.emit("onmousemove", data);
+
+    socket.emit("drawStroke", data);
   }
+  // drawStroke({
+  //   x: e.clientX,
+  //   y: e.clientY,
+  //   color: eraserFlag ? eraserColor : penColor,
+  //   width: eraserFlag ? eraserWidth : penWidth,
+  // });
 });
+
 canvas.addEventListener("mouseup", (e) => {
-  mouseDown = false;
-  tool.closePath();
-  // let url = canvas.toDataURL();
-  // undoRedoTracker.push(url);
-  // track = undoRedoTracker.length - 1;
+  mousedown = false;
+
+  //UndoRedo
+  let url = canvas.toDataURL();
+  undoRedoTracker.push(url);
+  track = undoRedoTracker.length - 1;
 });
-
-//undo
-undo.addEventListener("click", function () {
-  undoPoints();
-});
-
-//redo
-redo.addEventListener("click", function () {
-  redoPoints();
-});
-
-// function undoRedoCanvas(trackObj) {
-//   track = trackObj.trackValue;
-//   undoRedoTracker = trackObj.undoRedoTracker;
-
-//   let url = undoRedoTracker[track];
-//   let img = new Image(); // new image reference element
-//   img.src = url;
-//   img.onload = (e) => {
-//     tool.drawImage(img, 0, 0, canvas.width, canvas.height);
-//   };
-// }
-
-function redraw() {
-  for (let i = 0; i < points.length; i++) {
-    let point = undoRedoTracker[i];
-    tool.lineWidth = point.width;
-    tool.strokeStyle = point.color;
-    if (point.id == "md") {
-      tool.beginPath();
-      tool.moveTo(point.x, point.y);
-    } else {
-      tool.lineTo(point.x, point.y);
-      tool.stroke();
-    }
-  }
-  tool.strokeStyle = penColor;
-  tool.lineWidth = penWidth;
-
-  console.log("calling redraw");
-  socket.emit("redraw", points);
-}
 
 function beginPath(strokeObj) {
   tool.beginPath();
+  /*
+        clientX -> Means the current point where a user pointed his cursor in X axis
+        clientY -> Means the current point where a user pointed his cursor in Y axis
+    */
   tool.moveTo(strokeObj.x, strokeObj.y);
 }
+
 function drawStroke(strokeObj) {
   tool.strokeStyle = strokeObj.color;
   tool.lineWidth = strokeObj.width;
@@ -159,22 +109,24 @@ function drawStroke(strokeObj) {
   tool.stroke();
 }
 
-pencilColor.forEach((colorElem) => {
-  colorElem.addEventListener("click", (e) => {
-    let color = colorElem.classList[0];
-    penColor = color;
-    tool.strokeStyle = penColor;
+pencilColor.forEach((color) => {
+  color.addEventListener("click", (e) => {
+    let colorValue = color.classList[0];
+    penColor = colorValue;
+    tool.strokeStyle = penColor; //line color
   });
 });
 
 pencilWidthElem.addEventListener("change", (e) => {
   penWidth = pencilWidthElem.value;
-  tool.lineWidth = penWidth;
+  tool.lineWidth = penWidth; //Width of thr line
 });
+
 eraserWidthElem.addEventListener("change", (e) => {
   eraserWidth = eraserWidthElem.value;
   tool.lineWidth = eraserWidth;
 });
+
 eraser.addEventListener("click", (e) => {
   if (eraserFlag) {
     tool.strokeStyle = eraserColor;
@@ -185,80 +137,58 @@ eraser.addEventListener("click", (e) => {
   }
 });
 
+// ---------- DOWNLOAD -----------//
 download.addEventListener("click", (e) => {
   let url = canvas.toDataURL();
-
   let a = document.createElement("a");
   a.href = url;
   a.download = "board.jpg";
   a.click();
 });
 
-socket.on("onmousedown", function (point) {
-  // logic
-  let { x, y, width, color } = point;
-  tool.lineWidth = width;
-  tool.strokeStyle = color;
-  tool.beginPath();
-  tool.moveTo(x, y);
+// ---------- UNDO REDO -----------//
+undo.addEventListener("click", (e) => {
+  //For undo do -- in track
+  if (track >= 1) track--;
+
+  let data = {
+    trackValue: track,
+    undoRedoTracker,
+  };
+
+  socket.emit("redoUndo",data);
+  // undoRedoCanvas(trackObj);
 });
 
-socket.on("onmousemove", function (point) {
-  //logic
-  let { x, y, width, color } = point;
-  tool.lineWidth = width;
-  tool.strokeStyle = color;
-  tool.lineTo(x, y);
-  tool.stroke();
+redo.addEventListener("click", (e) => {
+  //For redo do ++ in track
+  if (track < undoRedoTracker.length - 1) track++;
+
+  let trackObj = {
+    trackValue: track,
+    undoRedoTracker,
+  };
+  undoRedoCanvas(trackObj);
 });
 
-socket.on("redraw", (points) => {
-  console.log("redraw reached");
-  tool.clearRect(0, 0, canvas.width, canvas.height);
-  for (let i = 0; i < undoRedoTracker.length; i++) {
-    let point = undoRedoTracker[i];
-    tool.lineWidth = point.width;
-    tool.strokeStyle = point.color;
-    if (point.id == "md") {
-      tool.beginPath();
-      tool.moveTo(point.x, point.y);
-    } else {
-      tool.lineTo(point.x, point.y);
-      tool.stroke();
-    }
-  }
-  tool.strokeStyle = penColor;
-  tool.lineWidth = penWidth;
-});
+function undoRedoCanvas(trackObj) {
+  track = trackObj.trackValue;
+  undoRedoTracker = trackObj.undoRedoTracker;
 
-
-function undoPoints() {
-  //1. remove the last line from db
-  let lastRemovedPoints = [];
-  let i = undoRedoTracker.length - 1;
-  while (i-- >= 0 && undoRedoTracker[i].id != "md") {
-    lastRemovedPoints.unshift(undoRedoTracker.pop());
-  }
-  lastRemovedPoints.unshift(undoRedoTracker.pop()); //to remove the last md
-  lastRemovedPoints.push(lastRemovedPoints);
-
-  //2. clear canvas
-  tool.clearRect(0, 0, canvas.width, canvas.height);
-
-  //3. redraw the remaining lines
-  redraw();
+  let url = undoRedoTracker[track];
+  let img = new Image(); // new image reference element
+  img.src = url;
+  img.onload = (e) => {
+    tool.drawImage(img, 0, 0, canvas.width, canvas.height); //draw previous data image on the canvas
+  };
 }
 
-function redoPoints() {
-  if (removedPoints.length >= 1) {
-    //add the last removed points back into the db
-    let removedPoint = removedPoints.pop();
-    for (let i = 0; i < removedPoint.length; i++) {
-      undoRedoTracker.push(removedPoint[i]);
-    }
-    // 2. clear canvas
-    tool.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    // 3. redraw points
-    redraw();
-  }
-}
+socket.on("beginPath", (data) => {
+  //data -> the data coming from serever
+  beginPath(data);
+});
+
+socket.on("drawStroke", (data) => {
+  //data -> the data coming from serever
+  drawStroke(data);
+});
